@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31423.177
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdsServer", "AdsServer\AdsServer.csproj", "{393946BE-5AF3-454D-8B72-0BDFADFADD67}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{393946BE-5AF3-454D-8B72-0BDFADFADD67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{393946BE-5AF3-454D-8B72-0BDFADFADD67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{393946BE-5AF3-454D-8B72-0BDFADFADD67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{393946BE-5AF3-454D-8B72-0BDFADFADD67}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C647E3A8-ACC7-4EDD-BA0D-44C041AE6C75}
+	EndGlobalSection
+EndGlobal
