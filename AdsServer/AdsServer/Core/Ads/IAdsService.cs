@@ -7,5 +7,7 @@ namespace AdsServer.Core.Ads
 	public interface IAdsService
 	{
 		public Task SwitchOutputAsync(string name, bool state, CancellationToken token);
+
+		public Task<bool> ReadOutputAsync(string name, CancellationToken token);
 	}
 }

@@ -29,6 +29,14 @@ namespace AdsServer.Core.Ads
 			result.ThrowOnError();
 		}
 
+		public async Task<bool> ReadOutputAsync(string name, CancellationToken token)
+		{
+			EnsureClientConnected();
+			var result = await client.ReadValueAsync<bool>(name, token);
+			result.ThrowOnError();
+			return result.Value;
+		}
+
 		private bool EnsureClientConnected()
 		{
 			if(client == null)

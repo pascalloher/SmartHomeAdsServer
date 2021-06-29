@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,18 +19,12 @@ namespace AdsServer.Controllers
 			_adsService = adsService;
 		}
 
-		// GET: api/<AdsController>
-		[HttpGet]
-		public IEnumerable<string> Get()
+		// GET api/<AdsController>/GVL.Output1
+		[HttpGet("{outputName}")]
+		public async Task<IActionResult> Get(string outputName, CancellationToken token)
 		{
-			return new string[] { "value1", "value2" };
-		}
-
-		// GET api/<AdsController>/5
-		[HttpGet("{id}")]
-		public string Get(int id)
-		{
-			return "value";
+			bool state = await _adsService.ReadOutputAsync(outputName, token);
+			return Ok(new { outputName, state });
 		}
 
 		// POST api/<AdsController>
@@ -37,18 +32,6 @@ namespace AdsServer.Controllers
 		public void Post(string outputName, bool state, CancellationToken token)
 		{
 			_adsService.SwitchOutputAsync(outputName, state, token);
-		}
-
-		// PUT api/<AdsController>/5
-		[HttpPut("{id}")]
-		public void Put(int id, [FromBody] string value)
-		{
-		}
-
-		// DELETE api/<AdsController>/5
-		[HttpDelete("{id}")]
-		public void Delete(int id)
-		{
 		}
 	}
 }
