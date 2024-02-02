@@ -1,4 +1,4 @@
-using AdsServer1.Core;
+using L1AdsServer.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +12,7 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
-builder.Services.AddScoped<IDimmerControl, DimmerControl>();
+builder.Services.AddSingleton<IDimmerControl, DimmerControl>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
