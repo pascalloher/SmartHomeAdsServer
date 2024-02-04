@@ -9,7 +9,22 @@ public enum DimmerId
     EG4,
     OG1,
     OG2,
-    OG3
+    OG3,
+    OG4,
+    OG5,
+    OG6,
+    OG7,
+    OG8,
+    OG9,
+    OG10,
+    OG11,
+    OG12,
+    OG13,
+    OG14,
+    OG15,
+    OG16,
+    OG17,
+    OG18
 }
 
 public enum Floor

@@ -5,17 +5,18 @@ namespace L1AdsServer.Core;
 public class DimmerControl : IDimmerControl
 {
     private Dictionary<DimmerId, ushort> _dimmerValues;
+    private readonly AdsClient _adsClient;
 
     public DimmerControl()
     {
         _dimmerValues = new Dictionary<DimmerId, ushort>(Enum.GetValues<DimmerId>().Length);
+        _adsClient = new AdsClient();
+        _adsClient.Connect(AmsNetId.Local, 851);
     }
 
     public async Task<uint> GetAsync(int dimmer, CancellationToken token)
     {
-        using AdsClient client = new();
-        client.Connect(AmsNetId.Local, 851);
-        ResultValue<uint> readResult = await client.ReadValueAsync<uint>($"Main.Dimmer[{dimmer}]", token);
+        ResultValue<uint> readResult = await _adsClient.ReadValueAsync<uint>($"Main.Dimmer[{dimmer}]", token);
         readResult.ThrowOnError();
         return readResult.Value;
     }
@@ -38,9 +39,8 @@ public class DimmerControl : IDimmerControl
 
     private async Task SetOnPlcAsync(DimmerId id, ushort value, CancellationToken token)
     {
-        using AdsClient client = new();
-        client.Connect(AmsNetId.Local, 851);
-        var result = await client.WriteValueAsync($"GVL_{GetFloor(id)}.Dimmer[{GetNumber(id)}]", value, token);
+        var variableName = $"GVL_{GetFloor(id)}.Dimmer[{GetNumber(id)}]";
+        var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 
