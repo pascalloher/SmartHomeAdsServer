@@ -12,6 +12,7 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
+builder.Services.AddSingleton<IBlindControl, BlindControl>();
 builder.Services.AddSingleton<IDimmerControl, DimmerControl>();
 
 builder.Services.AddControllers();
