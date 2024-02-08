@@ -15,14 +15,14 @@ public class BlindControl : IBlindControl
     public async Task OpenAsync(BlindId id, CancellationToken token)
     {
         await SetCloseOnPlcAsync(id, false, token);
-        await Task.Delay(500);
+        await Task.Delay(2000);
         await SetOpenOnPlcAsync(id, true, token);
     }
 
     public async Task CloseAsync(BlindId id, CancellationToken token)
     {
         await SetOpenOnPlcAsync(id, false, token);
-        await Task.Delay(500);
+        await Task.Delay(2000);
         await SetCloseOnPlcAsync(id, true, token);
     }
 
