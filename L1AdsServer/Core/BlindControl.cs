@@ -34,14 +34,14 @@ public class BlindControl : IBlindControl
 
     private async Task SetOpenOnPlcAsync(BlindId id, bool value, CancellationToken token)
     {
-        var variableName = $"GVL_{GetFloor(id)}.BlindOpen[{GetNumber(id)}]";
+        var variableName = $"GVL_UV.{GetFloor(id)}BlindOpen[{GetNumber(id)}]";
         var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 
     private async Task SetCloseOnPlcAsync(BlindId id, bool value, CancellationToken token)
     {
-        var variableName = $"GVL_{GetFloor(id)}.BlindClose[{GetNumber(id)}]";
+        var variableName = $"GVL_UV.{GetFloor(id)}BlindClose[{GetNumber(id)}]";
         var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
