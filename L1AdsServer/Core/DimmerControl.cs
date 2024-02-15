@@ -10,6 +10,11 @@ public class DimmerControl : IDimmerControl
     public DimmerControl()
     {
         _dimmerValues = new Dictionary<DimmerId, ushort>(Enum.GetValues<DimmerId>().Length);
+        foreach (var dimmerId in Enum.GetValues<DimmerId>())
+        {
+            _dimmerValues.Add(dimmerId, 30000);
+        }
+
         _adsClient = new AdsClient();
         _adsClient.Connect(AmsNetId.Local, 851);
     }
