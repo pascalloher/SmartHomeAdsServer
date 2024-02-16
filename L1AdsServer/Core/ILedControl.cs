@@ -12,6 +12,8 @@ public enum LedId
     Eg8,
     Eg9,
     Eg10,
+    Eg11,
+    Eg12,
     Og1,
     Og2,
     Og3,
@@ -25,7 +27,9 @@ public enum LedId
     Og11,
     Og12,
     Og13,
-    Og14
+    Og14,
+    Og15,
+    Og16,
 }
 
 public interface ILedControl
