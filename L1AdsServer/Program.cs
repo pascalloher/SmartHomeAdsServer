@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.HttpLogging;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddLogging(builder => builder.AddConsole());
+
 builder.Services.AddHttpLogging(logging =>
 {
     logging.LoggingFields = HttpLoggingFields.All;
@@ -26,6 +28,7 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 builder.Services.AddSingleton<IBlindControl, BlindControl>();
 builder.Services.AddSingleton<IDimmerControl, DimmerControl>();
+builder.Services.AddSingleton<IDoorControl, DoorControl>();
 builder.Services.AddSingleton<ILedControl, LedControl>();
 
 builder.Services.AddControllers();

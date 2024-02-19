@@ -41,9 +41,7 @@ public class LedController : ControllerBase
     [HttpPut("temperature/{id}")]
     public async Task Temperature(LedId id, [FromForm] int colorTemp, CancellationToken token)
     {
-        // Temperatur ranges from 150 to 500
-        await _ledControl.TemperatureAsync(id, (colorTemp - 150) / 350.0, token);
+        // Temperatur ranges from 153 to 500
+        await _ledControl.TemperatureAsync(id, (colorTemp - 153) / (500.0 - 153.0), token);
     }
-
-
 }
