@@ -21,11 +21,20 @@ public class DoorControl : IDoorControl
 
     public async Task OpenAsync(DoorId id, CancellationToken token)
     {
-        // Eingang an der Hörmann 560 Garagentorsteuerung ist low aktiv
-        await SetOpenOnPlcAsync(id, false, token);
-        await Task.Delay(200);
-        await SetOpenOnPlcAsync(id, true, token);
-        _doorStates[id] = DoorState.Opening;
+        if (id == DoorId.Eg1)
+        {
+            await SetOpenOnPlcAsync(id, true, token);
+            await Task.Delay(200);
+            await SetOpenOnPlcAsync(id, false, token);
+        }
+        else
+        {
+            // Eingang an der Hörmann 560 Garagentorsteuerung ist low aktiv
+            await SetOpenOnPlcAsync(id, false, token);
+            await Task.Delay(200);
+            await SetOpenOnPlcAsync(id, true, token);
+            _doorStates[id] = DoorState.Opening;
+        }
     }
 
     public async Task CloseAsync(DoorId id, CancellationToken token)

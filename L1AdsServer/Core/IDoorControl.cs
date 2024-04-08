@@ -4,6 +4,7 @@ public enum DoorId
 {
     Ga1 = 0,
     Ga2 = 1,
+    Eg1 = 2,
 }
 
 public enum DoorState

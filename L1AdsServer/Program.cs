@@ -1,4 +1,5 @@
 using L1AdsServer.Core;
+using L1AdsServer.Core.NewFolder;
 using Microsoft.AspNetCore.HttpLogging;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,10 +27,14 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
+builder.Services.AddSingleton<IDataExtractor, DataExtractor>();
+
 builder.Services.AddSingleton<IBlindControl, BlindControl>();
 builder.Services.AddSingleton<IDimmerControl, DimmerControl>();
 builder.Services.AddSingleton<IDoorControl, DoorControl>();
+builder.Services.AddSingleton<IInputControl, InputControl>();
 builder.Services.AddSingleton<ILedControl, LedControl>();
+builder.Services.AddSingleton<ISwitchControl, SwitchControl>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
