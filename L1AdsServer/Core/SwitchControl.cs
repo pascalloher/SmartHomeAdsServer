@@ -18,17 +18,27 @@ public class SwitchControl : ISwitchControl
 
     public async Task OnAsync(SwitchId id, CancellationToken token)
     {
-        await SetValueOnPlcAsync(GetFloor(id), (GetNumber(id) * 2) - 1, 1, token);
+        if(GetFloor(id) == Floor.Ug)
+            await SetValueOnPlcAsync(GetFloor(id), GetNumber(id), 1, token);
+        else
+            await SetValueOnPlcAsync(GetFloor(id), (GetNumber(id) * 2) - 1, 1, token);
     }
 
     public async Task OffAsync(SwitchId id, CancellationToken token)
     {
-        await SetValueOnPlcAsync(GetFloor(id), (GetNumber(id) * 2) - 1, 0, token);
+        if (GetFloor(id) == Floor.Ug)
+            await SetValueOnPlcAsync(GetFloor(id), GetNumber(id), 0, token);
+        else
+            await SetValueOnPlcAsync(GetFloor(id), (GetNumber(id) * 2) - 1, 0, token);
     }
 
     private async Task SetValueOnPlcAsync(Floor floor, int channel, int value, CancellationToken token)
     {
-        var variableName = $"GVL_UV.{floor}Out[{channel}]";
+        string variableName = string.Empty;
+        if(floor == Floor.Ug)
+            variableName = $"GVL_HV.{floor}Out[{channel}]";
+        else
+            variableName = $"GVL_UV.{floor}Out[{channel}]";
         var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }

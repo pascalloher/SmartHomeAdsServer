@@ -3,6 +3,7 @@
 public enum DimmerId
 {
     Ug1,
+    Ug2,
     Eg1,
     Eg2,
     Eg3,

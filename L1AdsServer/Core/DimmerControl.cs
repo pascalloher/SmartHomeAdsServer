@@ -44,7 +44,11 @@ public class DimmerControl : IDimmerControl
 
     private async Task SetOnPlcAsync(DimmerId id, ushort value, CancellationToken token)
     {
-        var variableName = $"GVL_UV.{GetFloor(id)}Dimmer[{GetNumber(id)}]";
+        string variableName = string.Empty;
+        if(id <= DimmerId.Ug2)
+            variableName = $"GVL_HV.{GetFloor(id)}Dimmer[{GetNumber(id)}]";
+        else
+            variableName = $"GVL_UV.{GetFloor(id)}Dimmer[{GetNumber(id)}]";
         var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }

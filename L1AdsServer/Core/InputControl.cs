@@ -31,7 +31,7 @@ public class InputControl : IInputControl
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _bearerToken);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://hal1:8123/api/states/sensor.eg_main_door_locked");
-            request.Content = new StringContent(JsonSerializer.Serialize(new { state = "On" }));
+            request.Content = new StringContent(JsonSerializer.Serialize(new { state = e.Data.ToArray()[0] == 1 ? "true" : "false" }));
             request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
             var response = client.Send(request);
