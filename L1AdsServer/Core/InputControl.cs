@@ -35,7 +35,7 @@ public class InputControl : IInputControl
             request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
             var response = client.Send(request);
-            _logger.LogWarning("Response", response);
+            _logger.LogWarning("{Response}", response);
         }
 
 
@@ -44,7 +44,7 @@ public class InputControl : IInputControl
 
     public async Task<bool> GetAsync(InputId id, CancellationToken token)
     {            
-        var variableName = _dataExtractor.CreateVariableName(id.ToString(), "Input", out bool firstAccess, out VariableInfo info);
+        var variableName = _dataExtractor.CreateVariableName(id.ToString(), "In", out bool firstAccess, out VariableInfo info);
         if (firstAccess)
             await RegisterChangeDetectionAsync(variableName, info, token);
 

@@ -52,7 +52,7 @@ public class DataExtractor: IDataExtractor
 
     private static VariableInfo ExtractInfo(string id)
     {
-        Regex r = new Regex("(?<Board>[A-Z]+)_(?<Floor>[A-Z]+)(?<Number>[0-9]+)");
+        Regex r = new Regex("(?<Board>[A-Za-z]{2})(?<Floor>[A-Za-z]{2})(?<Number>[0-9]+)");
         var m = r.Match(id);
         if (!m.Success)
             throw new ArgumentException("Failed to extract Info of passed string", id);

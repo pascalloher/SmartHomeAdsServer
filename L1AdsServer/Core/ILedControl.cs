@@ -2,40 +2,44 @@
 
 public enum LedId
 {
-    Eg1,
-    Eg2,
-    Eg3,
-    Eg4,
-    Eg5,
-    Eg6,
-    Eg7,
-    Eg8,
-    Eg9,
-    Eg10,
-    Eg11,
-    Eg12,
-    Og1,
-    Og2,
-    Og3,
-    Og4,
-    Og5,
-    Og6,
-    Og7,
-    Og8,
-    Og9,
-    Og10,
-    Og11,
-    Og12,
-    Og13,
-    Og14,
-    Og15,
-    Og16,
+    UvEg1,
+    UvEg2,
+    UvEg3,
+    UvEg4,
+    UvEg5,
+    UvEg6,
+    UvEg7,
+    UvEg8,
+    UvEg9,
+    UvEg10,
+    UvEg11,
+    UvEg12,
+    UvEg13,
+    UvEg14,
+    UvOg1,
+    UvOg2,
+    UvOg3,
+    UvOg4,
+    UvOg5,
+    UvOg6,
+    UvOg7,
+    UvOg8,
+    UvOg9,
+    UvOg10,
+    UvOg11,
+    UvOg12,
+    UvOg13,
+    UvOg14,
+    UvOg15,
+    UvOg16,
+    UvOg17,
+    UvOg18,
 }
 
 public interface ILedControl
 {
-    Task OnAsync(LedId id, CancellationToken token);
+    Task OnAsync(LedId id, bool brightMode, CancellationToken token);
     Task OffAsync(LedId id, CancellationToken token);
-    Task LevelAsync(LedId id, double brightness, CancellationToken token);
-    Task TemperatureAsync(LedId id, double colorTemp, CancellationToken token);
+    Task LevelAsync(LedId id, double brightness, bool brightMode, CancellationToken token);
+    Task TemperatureAsync(LedId id, double colorTemp, bool brightMode, CancellationToken token);
 }

@@ -3,7 +3,8 @@ namespace L1AdsServer.Core;
 
 public enum InputId
 {
-    UV_EG1 = 0, // Main Door Locked
+    UvEg1 = 0, // Main Door Locked
+    UvEg31 = 30 // eg_office_window_door
 }
 
 public interface IInputControl

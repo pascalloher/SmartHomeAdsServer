@@ -1,14 +1,18 @@
-﻿using TwinCAT.Ads;
+﻿using L1AdsServer.Core.NewFolder;
+using TwinCAT.Ads;
 
 namespace L1AdsServer.Core;
 
 public class DoorControl : IDoorControl
 {
+    private readonly IDataExtractor _dataExtractor;
     private readonly AdsClient _adsClient;
     private readonly Dictionary<DoorId, DoorState> _doorStates;
 
-    public DoorControl()
+    public DoorControl(IDataExtractor dataExtractor)
     {
+        _dataExtractor = dataExtractor;
+
         _adsClient = new AdsClient();
         _adsClient.Connect(AmsNetId.Local, 851);
 
@@ -21,7 +25,7 @@ public class DoorControl : IDoorControl
 
     public async Task OpenAsync(DoorId id, CancellationToken token)
     {
-        if (id == DoorId.Eg1)
+        if (id == DoorId.UvEg1)
         {
             await SetOpenOnPlcAsync(id, true, token);
             await Task.Delay(200);
@@ -48,55 +52,29 @@ public class DoorControl : IDoorControl
 
     public async Task StopAsync(DoorId id, CancellationToken token)
     {
-        if (_doorStates[id] == DoorState.Closing)
-        {
-            await CloseAsync(id, token);
-        }
-        else if (_doorStates[id] == DoorState.Opening)
-        { 
-            await OpenAsync(id, token);
-        }
+        // Stop-Eingang an der Hörmann 560 Garagentorsteuerung ist low aktiv und normally-closed
+        await SetStopOnPlcAsync(id, false, token);
+        await Task.Delay(200);
+        await SetStopOnPlcAsync(id, true, token);
     }
 
     private async Task SetOpenOnPlcAsync(DoorId id, bool value, CancellationToken token)
     {
-        var variableName = $"GVL_UV.{GetFloor(id)}DoorOpen[{GetNumber(id)}]";
+        var variableName = _dataExtractor.CreateVariableName(id.ToString(), "DoorOpen", out bool _, out VariableInfo _);
         var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 
     private async Task SetCloseOnPlcAsync(DoorId id, bool value, CancellationToken token)
     {
-        var variableName = $"GVL_UV.{GetFloor(id)}DoorClose[{GetNumber(id)}]";
+        var variableName = _dataExtractor.CreateVariableName(id.ToString(), "DoorClose", out bool _, out VariableInfo _);
         var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
-
-    private static Floor GetFloor(DoorId id)
+    private async Task SetStopOnPlcAsync(DoorId id, bool value, CancellationToken token)
     {
-        string floorString = id.ToString()[..2];
-
-        if (Enum.TryParse(floorString, out Floor floor))
-        {
-            return floor;
-        }
-        else
-        {
-            throw new ArgumentException($"Invalid DoorId '{id}'");
-        }
-    }
-
-    private static int GetNumber(DoorId id)
-    {
-        // Assuming the numeric part starts from the third character
-        if (int.TryParse(id.ToString()[2..], out int number))
-        {
-            return number;
-        }
-        else
-        {
-            // Handle the case where the numeric part is not a valid integer
-            throw new ArgumentException($"Invalid DoorId '{id}'");
-        }
+        var variableName = _dataExtractor.CreateVariableName(id.ToString(), "DoorStop", out bool _, out VariableInfo _);
+        var result = await _adsClient.WriteValueAsync(variableName, value, token);
+        result.ThrowOnError();
     }
 }

@@ -1,13 +1,18 @@
-﻿using TwinCAT.Ads;
+﻿using L1AdsServer.Core.NewFolder;
+using TwinCAT.Ads;
 
 namespace L1AdsServer.Core;
 
 public class BlindControl : IBlindControl
 {
+    private readonly IDataExtractor _dataExtractor;
     private readonly AdsClient _adsClient;
 
-    public BlindControl()
+
+    public BlindControl(IDataExtractor dataExtractor)
     {
+        _dataExtractor = dataExtractor;
+
         _adsClient = new AdsClient();
         _adsClient.Connect(AmsNetId.Local, 851);
     }
@@ -34,51 +39,15 @@ public class BlindControl : IBlindControl
 
     private async Task SetOpenOnPlcAsync(BlindId id, bool value, CancellationToken token)
     {
-        string variableName = string.Empty;
-        if(id <= BlindId.Ug2)
-            variableName = $"GVL_HV.{GetFloor(id)}BlindOpen[{GetNumber(id)}]";
-        else
-            variableName = $"GVL_UV.{GetFloor(id)}BlindOpen[{GetNumber(id)}]";
+        string variableName = _dataExtractor.CreateVariableName(id.ToString(), "BlindOpen", out bool _, out VariableInfo _);
         var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 
     private async Task SetCloseOnPlcAsync(BlindId id, bool value, CancellationToken token)
     {
-        string variableName = string.Empty;
-        if(id <= BlindId.Ug2)
-            variableName = $"GVL_HV.{GetFloor(id)}BlindClose[{GetNumber(id)}]";
-        else
-            variableName = $"GVL_UV.{GetFloor(id)}BlindClose[{GetNumber(id)}]";
+        string variableName = _dataExtractor.CreateVariableName(id.ToString(), "BlindClose", out bool _, out VariableInfo _);
         var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
-    }
-
-    private static Floor GetFloor(BlindId id)
-    {
-        string floorString = id.ToString()[..2];
-
-        if (Enum.TryParse(floorString, out Floor floor))
-        {
-            return floor;
-        }
-        else
-        {
-            throw new ArgumentException($"Invalid BlindId '{id}'");
-        }
-    }
-
-    private static int GetNumber(BlindId id)
-    {
-        // Assuming the numeric part starts from the third character
-        if (int.TryParse(id.ToString()[2..], out int number))
-        {
-            return number;
-        }
-        else
-        {
-            // Handle the case where the numeric part is not a valid integer
-            throw new ArgumentException($"Invalid BlindId '{id}'");
-        }
     }
 }

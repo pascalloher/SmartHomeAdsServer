@@ -2,9 +2,9 @@
 
 public enum DoorId
 {
-    Ga1 = 0,
-    Ga2 = 1,
-    Eg1 = 2,
+    UvGa1 = 0,
+    UvGa2 = 1,
+    UvEg1 = 2,
 }
 
 public enum DoorState

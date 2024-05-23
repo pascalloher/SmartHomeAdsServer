@@ -1,14 +1,17 @@
-﻿using TwinCAT.Ads;
+﻿using L1AdsServer.Core.NewFolder;
+using TwinCAT.Ads;
 
 namespace L1AdsServer.Core;
 
 public class DimmerControl : IDimmerControl
 {
-    private Dictionary<DimmerId, ushort> _dimmerValues;
+    private readonly IDataExtractor _dataExtractor;
+    private readonly Dictionary<DimmerId, ushort> _dimmerValues;
     private readonly AdsClient _adsClient;
 
-    public DimmerControl()
+    public DimmerControl(IDataExtractor dataExtractor)
     {
+        _dataExtractor = dataExtractor;
         _dimmerValues = new Dictionary<DimmerId, ushort>(Enum.GetValues<DimmerId>().Length);
         foreach (var dimmerId in Enum.GetValues<DimmerId>())
         {
@@ -44,40 +47,8 @@ public class DimmerControl : IDimmerControl
 
     private async Task SetOnPlcAsync(DimmerId id, ushort value, CancellationToken token)
     {
-        string variableName = string.Empty;
-        if(id <= DimmerId.Ug2)
-            variableName = $"GVL_HV.{GetFloor(id)}Dimmer[{GetNumber(id)}]";
-        else
-            variableName = $"GVL_UV.{GetFloor(id)}Dimmer[{GetNumber(id)}]";
+        string variableName = _dataExtractor.CreateVariableName(id.ToString(), "Dimmer", out bool _, out VariableInfo _);
         var result = await _adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
-    }
-
-    private static Floor GetFloor(DimmerId id)
-    {
-        string floorString = id.ToString()[..2];
-
-        if (Enum.TryParse(floorString, out Floor floor))
-        {
-            return floor;
-        }
-        else
-        {
-            throw new ArgumentException($"Invalid DimmerId '{id}'");
-        }
-    }
-
-    private static int GetNumber(DimmerId id)
-    {
-        // Assuming the numeric part starts from the third character
-        if (int.TryParse(id.ToString()[2..], out int number))
-        {
-            return number;
-        }
-        else
-        {
-            // Handle the case where the numeric part is not a valid integer
-            throw new ArgumentException($"Invalid DimmerId '{id}'");
-        }
     }
 }
