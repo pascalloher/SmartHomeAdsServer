@@ -38,8 +38,8 @@ public enum LedId
 
 public interface ILedControl
 {
-    Task OnAsync(LedId id, bool brightMode, CancellationToken token);
+    Task OnAsync(LedId id, CancellationToken token);
     Task OffAsync(LedId id, CancellationToken token);
-    Task LevelAsync(LedId id, double brightness, bool brightMode, CancellationToken token);
-    Task TemperatureAsync(LedId id, double colorTemp, bool brightMode, CancellationToken token);
+    Task LevelAsync(LedId id, double brightness, CancellationToken token);
+    Task TemperatureAsync(LedId id, double colorTemp, CancellationToken token);
 }

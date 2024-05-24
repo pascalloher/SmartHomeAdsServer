@@ -2,8 +2,8 @@
 
 public enum BlindId
 {
-    UvUg1,
-    UvUg2,
+    HvUg1,
+    HvUg2,
     UvGa1,
     UvGa2,
     UvEg1,

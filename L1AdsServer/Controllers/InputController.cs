@@ -5,11 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace L1AdsServer.Controllers;
 
-public class DeviceInfo
-{
-    public string DeviceName { get; set; } = String.Empty;
-}
-
 [ApiController]
 [Route("api/[controller]")]
 public class InputController : ControllerBase
@@ -28,6 +23,6 @@ public class InputController : ControllerBase
     public async Task<bool> In(InputId id, [FromBody] DeviceInfo deviceInfo, CancellationToken token)
     {
         _logger.LogWarning($"{DateTime.Now} GetInput for {id}, DeviceName: {deviceInfo.DeviceName}");
-        return await _inputControl.GetAsync(id, token);
+        return await _inputControl.GetAsync(id, deviceInfo, token);
     }
 }

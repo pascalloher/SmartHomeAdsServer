@@ -21,6 +21,7 @@ public class LedControl : ILedControl
     private readonly IDataExtractor _dataExtractor;
     private readonly AdsClient _adsClient;
     private readonly Dictionary<LedId, LedState> _ledStates;
+    private readonly List<LedId> _brightMode = [LedId.UvEg12, LedId.UvOg16];
 
     public LedControl(ILogger<LedControl> logger, IDataExtractor dataExtractor)
     {
@@ -36,9 +37,9 @@ public class LedControl : ILedControl
         }
     }
 
-    public async Task OnAsync(LedId id, bool brightMode, CancellationToken token)
+    public async Task OnAsync(LedId id, CancellationToken token)
     {
-        await Set(id, brightMode, token);
+        await Set(id, token);
     }
 
     public async Task OffAsync(LedId id, CancellationToken token)
@@ -46,19 +47,19 @@ public class LedControl : ILedControl
         await SetValueOnPlcAsync(id, 0, 0, token);
     }
 
-    public async Task LevelAsync(LedId id, double brightness, bool brightMode, CancellationToken token)
+    public async Task LevelAsync(LedId id, double brightness, CancellationToken token)
     {
         _ledStates[id].Brightness = brightness;
-        await Set(id, brightMode, token);
+        await Set(id, token);
     }
 
-    public async Task TemperatureAsync(LedId id, double temperature, bool brightMode, CancellationToken token)
+    public async Task TemperatureAsync(LedId id, double temperature, CancellationToken token)
     {
         _ledStates[id].Temperature = temperature;
-        await Set(id, brightMode, token);
+        await Set(id, token);
     }
 
-    private async Task Set(LedId id, bool brightMode, CancellationToken token)
+    private async Task Set(LedId id, CancellationToken token)
     {
         double temperature = _ledStates[id].Temperature;
         double brightness = _ledStates[id].Brightness;
@@ -66,7 +67,7 @@ public class LedControl : ILedControl
         double coldWhite;
         double warmWhite;
 
-        if (brightMode)
+        if (_brightMode.Contains(id))
         {
             // Temperatur 0 -> Kaltweiss, 1 -> Warmweiss
             // Maximale Helligkeit bei einer Temperatur von  0.22 - 0.27

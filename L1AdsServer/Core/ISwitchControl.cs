@@ -2,13 +2,13 @@
 
 public enum SwitchId
 {
-    Uv1 = 0,
-    Uv2 = 1,
-    Eg1 = 2, // Main Door Open
-    Ug1 = 3, // 24V Supply LED's
-    Ug2 = 4, // Light Technik
-    Ug3 = 5, // Light Keller
-    Ug4 = 6, // Light Werken
+    UvEg1 = 0, // 24V LED OG
+    UvEg2 = 1, // 24V LED EG
+    UvEg3 = 2, // Hauseingangstür Tag/Nacht
+    HvUg1 = 3, // 24V Supply LED's
+    HvUg2 = 4, // Light Technik
+    HvUg3 = 5, // Light Keller
+    HvUg4 = 6, // Light Werken
 }
 
 public interface ISwitchControl

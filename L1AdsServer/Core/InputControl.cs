@@ -24,37 +24,43 @@ public class InputControl : IInputControl
         _adsClient.AdsNotification += OnNotification;
     }
 
-    private void OnNotification(object? sender, AdsNotificationEventArgs e)
+    public async Task<bool> GetAsync(InputId id, DeviceInfo deviceInfo, CancellationToken token)
     {
-        using (var client = new HttpClient())
-        {
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _bearerToken);
-
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://hal1:8123/api/states/sensor.eg_main_door_locked");
-            request.Content = new StringContent(JsonSerializer.Serialize(new { state = e.Data.ToArray()[0] == 1 ? "true" : "false" }));
-            request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-
-            var response = client.Send(request);
-            _logger.LogWarning("{Response}", response);
-        }
-
-
-        _logger.LogWarning($"OnNotification {e.UserData}");
-    }
-
-    public async Task<bool> GetAsync(InputId id, CancellationToken token)
-    {            
-        var variableName = _dataExtractor.CreateVariableName(id.ToString(), "In", out bool firstAccess, out VariableInfo info);
+        var variableName = _dataExtractor.CreateVariableName(id.ToString(), "In", out bool firstAccess, out VariableInfo _);
         if (firstAccess)
-            await RegisterChangeDetectionAsync(variableName, info, token);
+            await RegisterChangeDetectionAsync(variableName, deviceInfo, token);
 
-        var resultValue =  await _adsClient.ReadValueAsync<bool>(variableName, token);
+        var resultValue = await _adsClient.ReadValueAsync<bool>(variableName, token);
         resultValue.ThrowOnError();
         return resultValue.Value;
     }
 
-    private async Task RegisterChangeDetectionAsync(string variableName, VariableInfo info, CancellationToken token)
+    private void OnNotification(object? sender, AdsNotificationEventArgs e)
     {
-        await _adsClient.AddDeviceNotificationAsync(variableName, 1, new NotificationSettings(AdsTransMode.OnChange, 100, 0), info, token);
+        _logger.LogWarning($"OnNotification {e.UserData}");
+
+        using (var client = new HttpClient())
+        {
+            if(e.UserData is DeviceInfo deviceInfo)
+            {
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _bearerToken);
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, $"http://hal1:8123/api/states/sensor.{deviceInfo.DeviceName}");
+                request.Content = new StringContent(JsonSerializer.Serialize(new { state = e.Data.ToArray()[0] == 1 ? "true" : "false" }));
+                request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+
+                var response = client.Send(request);
+                _logger.LogWarning("Post Value Response: {Response}", response);
+            }
+            else
+            {
+                _logger.LogError("DeviceInfo undefined!");
+            }
+        }
+    }
+
+    private async Task RegisterChangeDetectionAsync(string variableName, DeviceInfo deviceInfo, CancellationToken token)
+    {
+        await _adsClient.AddDeviceNotificationAsync(variableName, 1, new NotificationSettings(AdsTransMode.OnChange, 100, 0), deviceInfo, token);
     }
 }
