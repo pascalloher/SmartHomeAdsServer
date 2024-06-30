@@ -9,10 +9,12 @@ namespace L1AdsServer.Controllers;
 [Route("api/[controller]")]
 public class BlindController : ControllerBase
 {
+    private readonly ILogger<BlindController> _logger;
     private readonly IBlindControl _blindControl;
 
-    public BlindController(IBlindControl blindControl)
+    public BlindController(ILogger<BlindController> logger, IBlindControl blindControl)
     {
+        _logger = logger;
         _blindControl = blindControl;
     }
 
@@ -20,6 +22,7 @@ public class BlindController : ControllerBase
     [HttpPut("open/{id}")]
     public async Task Open(BlindId id, CancellationToken token)
     {
+        _logger.LogWarning("api/blind/open/{id} called", id);
         await _blindControl.OpenAsync(id, token);
     }
 
@@ -27,6 +30,7 @@ public class BlindController : ControllerBase
     [HttpPut("close/{id}")]
     public async Task Close(BlindId id, CancellationToken token)
     {
+        _logger.LogWarning("api/blind/close/{id} called", id);
         await _blindControl.CloseAsync(id, token);
     }
 
@@ -34,6 +38,7 @@ public class BlindController : ControllerBase
     [HttpPut("stop/{id}")]
     public async Task Stop(BlindId id, CancellationToken token)
     {
+        _logger.LogWarning("api/blind/stop/{id} called", id);
         await _blindControl.StopAsync(id, token);
     }
 }
