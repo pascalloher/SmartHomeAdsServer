@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
 
 namespace L1AdsServer.Core.NewFolder;
 
@@ -26,7 +27,7 @@ public interface IDataExtractor
 
 public class DataExtractor: IDataExtractor
 {
-    private readonly Dictionary<string, VariableInfo> _variables = new Dictionary<string, VariableInfo>();
+    private readonly ConcurrentDictionary<string, VariableInfo> _variables = new ConcurrentDictionary<string, VariableInfo>();
 
     bool IDataExtractor.Exists(string id)
     {
@@ -44,7 +45,7 @@ public class DataExtractor: IDataExtractor
         {
             firstAccess = true;
             info = ExtractInfo(id);
-            _variables.Add(id, info);
+            _variables[id] = info;
         }
 
         return $"GVL_{info.Board}.{info.Floor}{entity}[{info.Number}]";
