@@ -1,8 +1,11 @@
+using L1AdsServer.Configuration;
 using L1AdsServer.Core;
 using L1AdsServer.Core.NewFolder;
 using Microsoft.AspNetCore.HttpLogging;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
+var homeAssistantConfig = configuration.GetSection("HomeAssistant").Get<HomeAssistantConfig>();
 
 builder.Services.AddLogging(builder => builder.AddConsole());
 
@@ -15,6 +18,12 @@ builder.Services.AddHttpLogging(logging =>
     logging.RequestBodyLogLimit = 4096;
     logging.ResponseBodyLogLimit = 4096;
     logging.CombineLogs = true;
+});
+
+builder.Services.AddHttpClient(nameof(DataControl), client =>
+{
+    client.BaseAddress = homeAssistantConfig?.Uri;
+    client.DefaultRequestHeaders.Add("Authorization", "Bearer " + homeAssistantConfig?.BearerToken);
 });
 
 // Add CORS
@@ -35,6 +44,7 @@ builder.Services.AddSingleton<IDoorControl, DoorControl>();
 builder.Services.AddSingleton<IInputControl, InputControl>();
 builder.Services.AddSingleton<ILedControl, LedControl>();
 builder.Services.AddSingleton<ISwitchControl, SwitchControl>();
+builder.Services.AddSingleton<IDataControl, DataControl>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
