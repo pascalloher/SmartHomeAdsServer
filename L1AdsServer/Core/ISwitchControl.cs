@@ -9,6 +9,7 @@ public enum SwitchId
     HvUg2 = 4, // Light Technik
     HvUg3 = 5, // Light Keller
     HvUg4 = 6, // Light Werken
+    HvUg28 = 28, // Geschaltete Phase Technik Nord (Luftentfeuchter)
 }
 
 public interface ISwitchControl
