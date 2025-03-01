@@ -1,4 +1,4 @@
-﻿using L1AdsServer.Core;
+﻿using L1AdsServer.Core.Controls;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -22,7 +22,7 @@ public class BlindController : ControllerBase
     [HttpPut("open/{id}")]
     public async Task Open(BlindId id, CancellationToken token)
     {
-        _logger.LogWarning("api/blind/open/{id} called", id);
+        _logger.LogInformation(new EventId(702757139), "api/blind/open/{id} called", id);
         await _blindControl.OpenAsync(id, token);
     }
 
@@ -30,7 +30,7 @@ public class BlindController : ControllerBase
     [HttpPut("close/{id}")]
     public async Task Close(BlindId id, CancellationToken token)
     {
-        _logger.LogWarning("api/blind/close/{id} called", id);
+        _logger.LogInformation(new EventId(424141360), "api/blind/close/{id} called", id);
         await _blindControl.CloseAsync(id, token);
     }
 
@@ -38,7 +38,7 @@ public class BlindController : ControllerBase
     [HttpPut("stop/{id}")]
     public async Task Stop(BlindId id, CancellationToken token)
     {
-        _logger.LogWarning("api/blind/stop/{id} called", id);
+        _logger.LogInformation(new EventId(705612599), "api/blind/stop/{id} called", id);
         await _blindControl.StopAsync(id, token);
     }
 }

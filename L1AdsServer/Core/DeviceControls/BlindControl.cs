@@ -1,7 +1,7 @@
-﻿using L1AdsServer.Core.NewFolder;
+﻿using L1AdsServer.Core.Common;
 using TwinCAT.Ads;
 
-namespace L1AdsServer.Core;
+namespace L1AdsServer.Core.Controls;
 
 public enum BlindState
 {
@@ -16,14 +16,13 @@ public enum BlindState
 public class Blind
 {
 
-    private ILogger<Blind> _logger;
-    private readonly AdsClient _adsClient;
+    private readonly ILogger<Blind> _logger;
 
-    private string _openVariableName;
-    private string _closeVariableName;
+    private readonly string _openVariableName;
+    private readonly string _closeVariableName;
 
-    private System.Timers.Timer _openTimer;
-    private System.Timers.Timer _closeTimer;
+    private readonly System.Timers.Timer _openTimer;
+    private readonly System.Timers.Timer _closeTimer;
 
     private readonly TimeSpan _switchDirectionTimeout;
 
@@ -40,14 +39,12 @@ public class Blind
         }
         set
         {
-            _logger.LogWarning("Blind: {Id} -> {State}", Id, value);
+            _logger.LogInformation(new EventId(552084193), "Blind: {Id} -> {State}", Id, value);
             _state = value;
         }
     }
 
-    public double Position { get; set; }
-
-    public Blind(ILogger<Blind> logger, BlindId id, TimeSpan openTime, TimeSpan closeTime, string openVariableName, string closeVariableName, AdsClient adsClient)
+    public Blind(ILogger<Blind> logger, BlindId id, TimeSpan openTime, TimeSpan closeTime, string openVariableName, string closeVariableName)
     {
         _logger = logger;
 
@@ -58,7 +55,6 @@ public class Blind
         _switchDirectionTimeout = TimeSpan.FromSeconds(2);
         _openVariableName = openVariableName;
         _closeVariableName = closeVariableName;
-        _adsClient = adsClient;
 
         _openTimer = new System.Timers.Timer(openTime)
         {
@@ -131,13 +127,19 @@ public class Blind
 
     private async Task SetOpenOnPlcAsync(bool value, CancellationToken token)
     {
-        var result = await _adsClient.WriteValueAsync(_openVariableName, value, token);
+        using var adsClient = new AdsClient();
+        adsClient.Connect(AmsNetId.Local, 851);
+
+        var result = await adsClient.WriteValueAsync(_openVariableName, value, token);
         result.ThrowOnError();
     }
 
     private async Task SetCloseOnPlcAsync(bool value, CancellationToken token)
     {
-        var result = await _adsClient.WriteValueAsync(_closeVariableName, value, token);
+        using var adsClient = new AdsClient();
+        adsClient.Connect(AmsNetId.Local, 851);
+
+        var result = await adsClient.WriteValueAsync(_closeVariableName, value, token);
         result.ThrowOnError();
     }
 }
@@ -145,24 +147,17 @@ public class Blind
 public class BlindControl : IBlindControl
 {
     private readonly IDataExtractor _dataExtractor;
-    private readonly AdsClient _adsClient;
-
-
-    private readonly IDictionary<BlindId, Blind> _blinds;
+    private readonly Dictionary<BlindId, Blind> _blinds;
 
     public BlindControl(ILoggerFactory loggerFactory, IDataExtractor dataExtractor)
     {
         _dataExtractor = dataExtractor;
-
-        _adsClient = new AdsClient();
-        _adsClient.Connect(AmsNetId.Local, 851);
-
-        _blinds = new Dictionary<BlindId, Blind>();
+        _blinds = [];
         foreach(var id in Enum.GetValues<BlindId>())
         {
             string openVariableName = _dataExtractor.CreateVariableName(id.ToString(), "BlindOpen", out bool _, out VariableInfo _);
             string closeVariableName = _dataExtractor.CreateVariableName(id.ToString(), "BlindClose", out bool _, out VariableInfo _);
-            _blinds.Add(id, new Blind(loggerFactory.CreateLogger<Blind>(), id, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), openVariableName, closeVariableName, _adsClient));
+            _blinds.Add(id, new Blind(loggerFactory.CreateLogger<Blind>(), id, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(90), openVariableName, closeVariableName));
         }
     }
 

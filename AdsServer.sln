@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L1AdsServer", "L1AdsServer\L1AdsServer.csproj", "{0F3ECFEC-87FB-47C6-8C21-907515161F60}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LicenseActivator", "LicenseActivator\LicenseActivator.csproj", "{51B47BD3-6345-461A-95DF-FC1F390A3444}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0F3ECFEC-87FB-47C6-8C21-907515161F60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F3ECFEC-87FB-47C6-8C21-907515161F60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F3ECFEC-87FB-47C6-8C21-907515161F60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51B47BD3-6345-461A-95DF-FC1F390A3444}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51B47BD3-6345-461A-95DF-FC1F390A3444}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51B47BD3-6345-461A-95DF-FC1F390A3444}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51B47BD3-6345-461A-95DF-FC1F390A3444}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,15 +1,47 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
+
+	<Version>1.0.0</Version>
+	<AssemblyVersion>1.0.0.0</AssemblyVersion>
+	<FileVersion>1.0.0.0</FileVersion>
+	<InformationalVersion>1.0.0</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Beckhoff.TwinCAT.Ads" Version="6.1.154" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Beckhoff.TwinCAT.Ads" Version="6.2.244" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LicenseActivator\LicenseActivator.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Accessibility">
+      <HintPath>..\LicenseActivator\libs\Accessibility.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="..\LicenseActivator\libs\Accessibility.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <ApplicationDefinition Include="Scripts\install-service.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Scripts\install-service.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

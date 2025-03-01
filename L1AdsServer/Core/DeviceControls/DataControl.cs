@@ -2,10 +2,10 @@
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using L1AdsServer.Controllers;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using L1AdsServer.Core.Plc;
 using TwinCAT.Ads;
 
-namespace L1AdsServer.Core;
+namespace L1AdsServer.Core.Controls;
 
 [StructLayout(LayoutKind.Sequential, Pack = 0, CharSet = CharSet.Ansi)]
 public struct StPower
@@ -63,17 +63,51 @@ public class DataControl : IDataControl
 {
     private readonly ILogger<DataControl> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly AdsClient _adsClient;
+    private AdsClient _adsClient;
     private readonly ConcurrentDictionary<string, DataDescription> _dataDescriptions;
 
-    public DataControl(ILogger<DataControl> logger, IHttpClientFactory httpClientFactory)
+    public DataControl(ILogger<DataControl> logger, IHttpClientFactory httpClientFactory, IHeartbeatMonitor heartbeatMonitor)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
+        _dataDescriptions = new ConcurrentDictionary<string, DataDescription>();
+
         _adsClient = new AdsClient();
         _adsClient.Connect(AmsNetId.Local, 851);
-        _dataDescriptions = new ConcurrentDictionary<string, DataDescription>();
         _adsClient.AdsNotification += OnNotification;
+
+        // Subscribe to the HeartbeatMonitor
+        heartbeatMonitor.PlcRestartDetected.Subscribe(async heartbeat => {
+            await OnPlcRestartDetectedAsync(heartbeat);
+        });
+    }
+
+    private async Task OnPlcRestartDetectedAsync(ulong? lastHeartbeat)
+    {
+        _logger.LogWarning(new EventId(123456789), "PLC restart detected. Last heartbeat: {LastHeartbeat}", lastHeartbeat);
+        
+        foreach(var dataDescription in _dataDescriptions.Values)
+        {
+            if(dataDescription.PlcHandle != null)
+            {
+                _adsClient.TryDeleteVariableHandle(dataDescription.PlcHandle.Handle);
+            }
+        }
+
+        _adsClient.Close();
+        _adsClient.Dispose();
+
+        _adsClient = new AdsClient();
+        _adsClient.Connect(AmsNetId.Local, 851);
+        _adsClient.AdsNotification += OnNotification;
+
+        foreach(var dataDescription in _dataDescriptions.Values)
+        {
+            if(dataDescription.RegisterChangeDetection == true)
+            {
+                await RegisterChangeDetectionAsync(dataDescription, CancellationToken.None);
+            }
+        }
     }
 
     public async Task<object?> SubscribeAsync(DataDescription dataDescription, CancellationToken token)
@@ -83,7 +117,7 @@ public class DataControl : IDataControl
 
         switch(dataDescription.Type)
         {
-            case "StPower": 
+            case "StPower":
                 var resultValue = await _adsClient.ReadValueAsync<StPower>(dataDescription.PlcName, token);
                 resultValue.ThrowOnError();
                 return JsonSerializer.Serialize(resultValue.Value, new JsonSerializerOptions { IncludeFields = true });
@@ -95,7 +129,7 @@ public class DataControl : IDataControl
 
     private async Task RegisterChangeDetectionAsync(DataDescription dataDescription, CancellationToken token)
     {
-        await _adsClient.AddDeviceNotificationAsync(dataDescription.PlcName,
+        dataDescription.PlcHandle = await _adsClient.AddDeviceNotificationAsync(dataDescription.PlcName,
             GetDataSize(dataDescription.Type), new NotificationSettings(AdsTransMode.OnChange, 100, 0),
             dataDescription, token);
     }
@@ -120,6 +154,7 @@ public class DataControl : IDataControl
             };
             var data = JsonSerializer.Serialize(new { state = d }, new JsonSerializerOptions
             {
+
                 IncludeFields = true
             });
             SendReply(description, data);
@@ -134,7 +169,7 @@ public class DataControl : IDataControl
         request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
         var response = client.Send(request);
-        _logger.LogWarning("Post Value Response: {Response}", response);
+        _logger.LogInformation(new EventId(1876179047), "Post Value Response: {Response}", response);
     }
 }
 

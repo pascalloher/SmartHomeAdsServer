@@ -1,4 +1,4 @@
-﻿namespace L1AdsServer.Core;
+﻿namespace L1AdsServer.Core.Controls;
 
 public enum SwitchId
 {

@@ -1,5 +1,6 @@
-﻿using L1AdsServer.Core;
+﻿using L1AdsServer.Core.Controls;
 using Microsoft.AspNetCore.Mvc;
+using TwinCAT.Ads;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,6 +12,8 @@ public class DataDescription(string plcName, string type)
     public string Type { get; } = type;
     public string HaName { get; } = "";
     public bool RegisterChangeDetection { get; } = false;
+
+    public ResultHandle? PlcHandle { get; set; } = null;
 }
 
 [ApiController]
@@ -21,7 +24,7 @@ public class DataController(ILogger<DataController> logger, IDataControl dataCon
     [HttpPost("subscribe")]
     public async Task<object?> Subscribe([FromBody] DataDescription dataDescription, CancellationToken token)
     {
-        logger.LogWarning($"{DateTime.Now} GetInput for {dataDescription}");
+        logger.LogInformation(new EventId(474183080), $"{DateTime.Now} GetInput for {dataDescription}");
         return await dataControl.SubscribeAsync(dataDescription, token);
     }
 }

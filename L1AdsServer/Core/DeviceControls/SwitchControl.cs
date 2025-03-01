@@ -1,21 +1,17 @@
-﻿using L1AdsServer.Core.NewFolder;
+﻿using L1AdsServer.Core.Common;
 using TwinCAT.Ads;
 
-namespace L1AdsServer.Core;
+namespace L1AdsServer.Core.Controls;
 
 public class SwitchControl : ISwitchControl
 {
     private readonly ILogger<SwitchControl> _logger;
     private readonly IDataExtractor _dataExtractor;
-    private readonly AdsClient _adsClient;
 
     public SwitchControl(ILogger<SwitchControl> logger, IDataExtractor dataExtractor)
     {
         _logger = logger;
         _dataExtractor = dataExtractor;
-
-        _adsClient = new AdsClient();
-        _adsClient.Connect(AmsNetId.Local, 851);
     }
 
     public async Task OnAsync(SwitchId id, CancellationToken token)
@@ -30,8 +26,11 @@ public class SwitchControl : ISwitchControl
 
     private async Task SetValueOnPlcAsync(SwitchId id, int value, CancellationToken token)
     {
+        using var adsClient = new AdsClient();
+        adsClient.Connect(AmsNetId.Local, 851);
+
         string variableName = _dataExtractor.CreateVariableName(id.ToString(), "Out", out bool _, out VariableInfo _);
-        var result = await _adsClient.WriteValueAsync(variableName, value, token);
+        var result = await adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 }

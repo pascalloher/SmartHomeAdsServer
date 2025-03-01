@@ -1,22 +1,17 @@
-﻿using L1AdsServer.Core.NewFolder;
+﻿using L1AdsServer.Core.Common;
 using TwinCAT.Ads;
 
-namespace L1AdsServer.Core;
+namespace L1AdsServer.Core.Controls;
 
 public class DoorControl : IDoorControl
 {
     private readonly IDataExtractor _dataExtractor;
-    private readonly AdsClient _adsClient;
     private readonly Dictionary<DoorId, DoorState> _doorStates;
 
     public DoorControl(IDataExtractor dataExtractor)
     {
         _dataExtractor = dataExtractor;
-
-        _adsClient = new AdsClient();
-        _adsClient.Connect(AmsNetId.Local, 851);
-
-        _doorStates = new Dictionary<DoorId, DoorState>();
+        _doorStates = [];
         foreach(var doorId in Enum.GetValues<DoorId>())
         {
             _doorStates.Add(doorId, DoorState.Undefined);
@@ -28,14 +23,14 @@ public class DoorControl : IDoorControl
         if (id == DoorId.UvEg1)
         {
             await SetOpenOnPlcAsync(id, true, token);
-            await Task.Delay(200);
+            await Task.Delay(200, token);
             await SetOpenOnPlcAsync(id, false, token);
         }
         else
         {
             // Eingang an der Hörmann 560 Garagentorsteuerung ist low aktiv
             await SetOpenOnPlcAsync(id, false, token);
-            await Task.Delay(200);
+            await Task.Delay(200, token);
             await SetOpenOnPlcAsync(id, true, token);
             _doorStates[id] = DoorState.Opening;
         }
@@ -45,7 +40,7 @@ public class DoorControl : IDoorControl
     {
         // Eingang an der Hörmann 560 Garagentorsteuerung ist low aktiv
         await SetCloseOnPlcAsync(id, false, token);
-        await Task.Delay(200);
+        await Task.Delay(200, token);
         await SetCloseOnPlcAsync(id, true, token);
         _doorStates[id] = DoorState.Closing;
     }
@@ -54,27 +49,36 @@ public class DoorControl : IDoorControl
     {
         // Stop-Eingang an der Hörmann 560 Garagentorsteuerung ist low aktiv und normally-closed
         await SetStopOnPlcAsync(id, false, token);
-        await Task.Delay(200);
+        await Task.Delay(200, token);
         await SetStopOnPlcAsync(id, true, token);
     }
 
     private async Task SetOpenOnPlcAsync(DoorId id, bool value, CancellationToken token)
     {
+        using var adsClient = new AdsClient();
+        adsClient.Connect(AmsNetId.Local, 851);
+
         var variableName = _dataExtractor.CreateVariableName(id.ToString(), "DoorOpen", out bool _, out VariableInfo _);
-        var result = await _adsClient.WriteValueAsync(variableName, value, token);
+        var result = await adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 
     private async Task SetCloseOnPlcAsync(DoorId id, bool value, CancellationToken token)
     {
+        using var adsClient = new AdsClient();
+        adsClient.Connect(AmsNetId.Local, 851);
+
         var variableName = _dataExtractor.CreateVariableName(id.ToString(), "DoorClose", out bool _, out VariableInfo _);
-        var result = await _adsClient.WriteValueAsync(variableName, value, token);
+        var result = await adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
     private async Task SetStopOnPlcAsync(DoorId id, bool value, CancellationToken token)
     {
+        using var adsClient = new AdsClient();
+        adsClient.Connect(AmsNetId.Local, 851);
+
         var variableName = _dataExtractor.CreateVariableName(id.ToString(), "DoorStop", out bool _, out VariableInfo _);
-        var result = await _adsClient.WriteValueAsync(variableName, value, token);
+        var result = await adsClient.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 }

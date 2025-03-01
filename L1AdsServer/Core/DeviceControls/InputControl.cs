@@ -1,8 +1,8 @@
-﻿using L1AdsServer.Core.NewFolder;
-using System.Text.Json;
+﻿using System.Text.Json;
+using L1AdsServer.Core.Common;
 using TwinCAT.Ads;
 
-namespace L1AdsServer.Core;
+namespace L1AdsServer.Core.Controls;
 
 public class InputControl : IInputControl
 {
@@ -37,7 +37,7 @@ public class InputControl : IInputControl
 
     private void OnNotification(object? sender, AdsNotificationEventArgs e)
     {
-        _logger.LogWarning($"OnNotification {e.UserData}");
+        _logger.LogInformation(new EventId(534628418), $"OnNotification {e.UserData}");
 
         using (var client = new HttpClient())
         {
@@ -50,11 +50,11 @@ public class InputControl : IInputControl
                 request.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
                 var response = client.Send(request);
-                _logger.LogWarning("Post Value Response: {Response}", response);
+                _logger.LogInformation(new EventId(1415604628), "Post Value Response: {Response}", response);
             }
             else
             {
-                _logger.LogError("DeviceInfo undefined!");
+                _logger.LogError(new EventId(176956584), "DeviceInfo undefined!");
             }
         }
     }

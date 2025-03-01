@@ -1,6 +1,6 @@
 ﻿using L1AdsServer.Controllers;
 
-namespace L1AdsServer.Core;
+namespace L1AdsServer.Core.Controls;
 
 public interface IDataControl
 {

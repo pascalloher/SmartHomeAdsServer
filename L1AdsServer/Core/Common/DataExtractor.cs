@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 
-namespace L1AdsServer.Core.NewFolder;
+namespace L1AdsServer.Core.Common;
 
 public class VariableInfo
 {

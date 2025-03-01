@@ -1,8 +1,8 @@
-﻿namespace L1AdsServer.Core;
+﻿namespace L1AdsServer.Core.Controls;
 
 public class DeviceInfo
 {
-    public string DeviceName { get; set; } = String.Empty;
+    public string DeviceName { get; set; } = string.Empty;
 }
 
 public enum InputId
