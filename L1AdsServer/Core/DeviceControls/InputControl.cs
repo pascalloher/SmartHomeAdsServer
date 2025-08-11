@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using L1AdsServer.Core.Common;
+using L1AdsServer.Core.Plc;
 using TwinCAT.Ads;
 
 namespace L1AdsServer.Core.Controls;
@@ -8,20 +9,17 @@ public class InputControl : IInputControl
 {
     private readonly ILogger<InputControl> _logger;
     private readonly IDataExtractor _dataExtractor;
-
-    private readonly AdsClient _adsClient;
+    private readonly IAdsService _adsService;
 
     private readonly string _bearerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjMDkyNmVjMjFiODY0ODlhOWI5M2FkMDMwODcwMzZlZSIsImlhdCI6MTcxMjYxMDk5NiwiZXhwIjoyMDI3OTcwOTk2fQ.dg2LexXQ6B5Djz1OT17F0h6PXD9xQ-2LoZGDpOE_JSY";
 
-    public InputControl(ILogger<InputControl> logger, IDataExtractor dataExtractor)
+    public InputControl(ILogger<InputControl> logger, IDataExtractor dataExtractor, IAdsService adsService)
     {
         _logger = logger;
         _dataExtractor = dataExtractor;
+        _adsService = adsService;
 
-        _adsClient = new AdsClient();
-        _adsClient.Connect(AmsNetId.Local, 851);
-
-        _adsClient.AdsNotification += OnNotification;
+        _adsService.AdsNotification += OnNotification;
     }
 
     public async Task<bool> GetAsync(InputId id, DeviceInfo deviceInfo, CancellationToken token)
@@ -30,9 +28,7 @@ public class InputControl : IInputControl
         if (firstAccess)
             await RegisterChangeDetectionAsync(variableName, deviceInfo, token);
 
-        var resultValue = await _adsClient.ReadValueAsync<bool>(variableName, token);
-        resultValue.ThrowOnError();
-        return resultValue.Value;
+        return await _adsService.ReadValueAsync<bool>(variableName, token);
     }
 
     private void OnNotification(object? sender, AdsNotificationEventArgs e)
@@ -61,6 +57,6 @@ public class InputControl : IInputControl
 
     private async Task RegisterChangeDetectionAsync(string variableName, DeviceInfo deviceInfo, CancellationToken token)
     {
-        await _adsClient.AddDeviceNotificationAsync(variableName, 1, new NotificationSettings(AdsTransMode.OnChange, 100, 0), deviceInfo, token);
+        await _adsService.AddDeviceNotificationAsync(variableName, 1, new NotificationSettings(AdsTransMode.OnChange, 100, 0), deviceInfo, token);
     }
 }

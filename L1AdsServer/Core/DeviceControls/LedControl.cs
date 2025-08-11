@@ -1,4 +1,5 @@
 ﻿using L1AdsServer.Core.Common;
+using L1AdsServer.Core.Plc;
 using TwinCAT.Ads;
 
 namespace L1AdsServer.Core.Controls;
@@ -17,15 +18,17 @@ public class LedState {
 public class LedControl : ILedControl
 {
     private readonly ILogger<LedControl> _logger;
-
     private readonly IDataExtractor _dataExtractor;
+    private readonly IAdsService _adsService;
+
     private readonly Dictionary<LedId, LedState> _ledStates;
     private readonly List<LedId> _brightMode = [LedId.UvEg12, LedId.UvOg16];
 
-    public LedControl(ILogger<LedControl> logger, IDataExtractor dataExtractor)
+    public LedControl(ILogger<LedControl> logger, IDataExtractor dataExtractor, IAdsService adsService)
     {
         _logger = logger;
         _dataExtractor = dataExtractor;
+        _adsService = adsService;
 
         _ledStates = [];
         foreach(var ledId in Enum.GetValues<LedId>()) {
@@ -87,15 +90,12 @@ public class LedControl : ILedControl
 
     private async Task SetValueOnPlcAsync(LedId id, int warmWhite, int coldWhite, CancellationToken token)
     {
-        using var adsClient = new AdsClient();
-        adsClient.Connect(AmsNetId.Local, 851);
-
         var variableNameWarmWhite = _dataExtractor.CreateVariableName(id.ToString(), "LedWw", out bool _, out VariableInfo _);
         var variableNameColdWhite = _dataExtractor.CreateVariableName(id.ToString(), "LedCw", out bool _, out VariableInfo _);
 
-        var result = await adsClient.WriteValueAsync(variableNameWarmWhite, warmWhite, token);
+        var result = await _adsService.WriteValueAsync(variableNameWarmWhite, warmWhite, token);
         result.ThrowOnError();
-        result = await adsClient.WriteValueAsync(variableNameColdWhite, coldWhite, token);
+        result = await _adsService.WriteValueAsync(variableNameColdWhite, coldWhite, token);
         result.ThrowOnError();
     }
 }

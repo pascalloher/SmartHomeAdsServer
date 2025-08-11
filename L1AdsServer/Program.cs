@@ -58,9 +58,9 @@ try
     });
 
     // Add services to the container.
-    builder.Services.AddSingleton<IHeartbeatMonitor, HeartbeatMonitor>();
+    builder.Services.AddSingleton<IAdsService, AdsService>();
     builder.Services.AddSingleton<IDataExtractor, DataExtractor>();
-
+    
     builder.Services.AddSingleton<IBlindControl, BlindControl>();
     builder.Services.AddSingleton<IDimmerControl, DimmerControl>();
     builder.Services.AddSingleton<IDoorControl, DoorControl>();

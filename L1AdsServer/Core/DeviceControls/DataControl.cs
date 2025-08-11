@@ -63,21 +63,18 @@ public class DataControl : IDataControl
 {
     private readonly ILogger<DataControl> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
-    private AdsClient _adsClient;
+    private readonly IAdsService _adsService;
     private readonly ConcurrentDictionary<string, DataDescription> _dataDescriptions;
 
-    public DataControl(ILogger<DataControl> logger, IHttpClientFactory httpClientFactory, IHeartbeatMonitor heartbeatMonitor)
+    public DataControl(ILogger<DataControl> logger, IHttpClientFactory httpClientFactory, IAdsService adsService)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
+        _adsService = adsService;
         _dataDescriptions = new ConcurrentDictionary<string, DataDescription>();
 
-        _adsClient = new AdsClient();
-        _adsClient.Connect(AmsNetId.Local, 851);
-        _adsClient.AdsNotification += OnNotification;
-
         // Subscribe to the HeartbeatMonitor
-        heartbeatMonitor.PlcRestartDetected.Subscribe(async heartbeat => {
+        _adsService.PlcRestartDetected.Subscribe(async heartbeat => {
             await OnPlcRestartDetectedAsync(heartbeat);
         });
     }
@@ -85,21 +82,6 @@ public class DataControl : IDataControl
     private async Task OnPlcRestartDetectedAsync(ulong? lastHeartbeat)
     {
         _logger.LogWarning(new EventId(123456789), "PLC restart detected. Last heartbeat: {LastHeartbeat}", lastHeartbeat);
-        
-        foreach(var dataDescription in _dataDescriptions.Values)
-        {
-            if(dataDescription.PlcHandle != null)
-            {
-                _adsClient.TryDeleteVariableHandle(dataDescription.PlcHandle.Handle);
-            }
-        }
-
-        _adsClient.Close();
-        _adsClient.Dispose();
-
-        _adsClient = new AdsClient();
-        _adsClient.Connect(AmsNetId.Local, 851);
-        _adsClient.AdsNotification += OnNotification;
 
         foreach(var dataDescription in _dataDescriptions.Values)
         {
@@ -118,9 +100,8 @@ public class DataControl : IDataControl
         switch(dataDescription.Type)
         {
             case "StPower":
-                var resultValue = await _adsClient.ReadValueAsync<StPower>(dataDescription.PlcName, token);
-                resultValue.ThrowOnError();
-                return JsonSerializer.Serialize(resultValue.Value, new JsonSerializerOptions { IncludeFields = true });
+                var power = await _adsService.ReadValueAsync<StPower>(dataDescription.PlcName, token);
+                return JsonSerializer.Serialize(power, new JsonSerializerOptions { IncludeFields = true });
             default:
                 break;
         }
@@ -129,7 +110,7 @@ public class DataControl : IDataControl
 
     private async Task RegisterChangeDetectionAsync(DataDescription dataDescription, CancellationToken token)
     {
-        dataDescription.PlcHandle = await _adsClient.AddDeviceNotificationAsync(dataDescription.PlcName,
+        dataDescription.PlcHandle = await _adsService.AddDeviceNotificationAsync(dataDescription.PlcName,
             GetDataSize(dataDescription.Type), new NotificationSettings(AdsTransMode.OnChange, 100, 0),
             dataDescription, token);
     }

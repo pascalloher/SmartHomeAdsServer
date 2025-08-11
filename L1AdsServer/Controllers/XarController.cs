@@ -20,9 +20,17 @@ public class XarController: ControllerBase
     [HttpPost("activateLicense")]
     public ActivationResult ActivateLicense()
     {
-        var result = _xarLicenseHandler.Activate();
-        if(result == ActivationResultCode.Success)
-            return new ActivationResult(result, _xarLicenseHandler.IssueTime, _xarLicenseHandler.ExpireTime);
-        return new ActivationResult(result, null, null);
+        ActivationResultCode result = ActivationResultCode.ActivationProcessNotStarted;
+        try
+        {
+            result = _xarLicenseHandler.Activate();
+            if (result == ActivationResultCode.Success)
+                return new ActivationResult(result, _xarLicenseHandler.IssueTime, _xarLicenseHandler.ExpireTime);
+            return new ActivationResult(result, null, null);
+        }
+        catch(Exception)
+        {
+            return new ActivationResult(result, null, null);
+        }
     }
 }

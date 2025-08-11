@@ -1,4 +1,5 @@
 ﻿using L1AdsServer.Core.Common;
+using L1AdsServer.Core.Plc;
 using TwinCAT.Ads;
 
 namespace L1AdsServer.Core.Controls;
@@ -6,11 +7,13 @@ namespace L1AdsServer.Core.Controls;
 public class DoorControl : IDoorControl
 {
     private readonly IDataExtractor _dataExtractor;
+    private readonly IAdsService _adsService;
     private readonly Dictionary<DoorId, DoorState> _doorStates;
 
-    public DoorControl(IDataExtractor dataExtractor)
+    public DoorControl(IDataExtractor dataExtractor, IAdsService adsService)
     {
         _dataExtractor = dataExtractor;
+        _adsService = adsService;
         _doorStates = [];
         foreach(var doorId in Enum.GetValues<DoorId>())
         {
@@ -55,30 +58,21 @@ public class DoorControl : IDoorControl
 
     private async Task SetOpenOnPlcAsync(DoorId id, bool value, CancellationToken token)
     {
-        using var adsClient = new AdsClient();
-        adsClient.Connect(AmsNetId.Local, 851);
-
         var variableName = _dataExtractor.CreateVariableName(id.ToString(), "DoorOpen", out bool _, out VariableInfo _);
-        var result = await adsClient.WriteValueAsync(variableName, value, token);
+        var result = await _adsService.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 
     private async Task SetCloseOnPlcAsync(DoorId id, bool value, CancellationToken token)
     {
-        using var adsClient = new AdsClient();
-        adsClient.Connect(AmsNetId.Local, 851);
-
         var variableName = _dataExtractor.CreateVariableName(id.ToString(), "DoorClose", out bool _, out VariableInfo _);
-        var result = await adsClient.WriteValueAsync(variableName, value, token);
+        var result = await _adsService.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
     private async Task SetStopOnPlcAsync(DoorId id, bool value, CancellationToken token)
     {
-        using var adsClient = new AdsClient();
-        adsClient.Connect(AmsNetId.Local, 851);
-
         var variableName = _dataExtractor.CreateVariableName(id.ToString(), "DoorStop", out bool _, out VariableInfo _);
-        var result = await adsClient.WriteValueAsync(variableName, value, token);
+        var result = await _adsService.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 }

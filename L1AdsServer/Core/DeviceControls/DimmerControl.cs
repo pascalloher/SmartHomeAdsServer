@@ -1,4 +1,5 @@
 ﻿using L1AdsServer.Core.Common;
+using L1AdsServer.Core.Plc;
 using TwinCAT.Ads;
 
 namespace L1AdsServer.Core.Controls;
@@ -6,11 +7,15 @@ namespace L1AdsServer.Core.Controls;
 public class DimmerControl : IDimmerControl
 {
     private readonly IDataExtractor _dataExtractor;
+    private readonly IAdsService _adsService;
+
     private readonly Dictionary<DimmerId, ushort> _dimmerValues;
 
-    public DimmerControl(IDataExtractor dataExtractor)
+    public DimmerControl(IDataExtractor dataExtractor, IAdsService adsService)
     {
         _dataExtractor = dataExtractor;
+        _adsService = adsService;
+
         _dimmerValues = new Dictionary<DimmerId, ushort>(Enum.GetValues<DimmerId>().Length);
         foreach (var dimmerId in Enum.GetValues<DimmerId>())
         {
@@ -20,11 +25,7 @@ public class DimmerControl : IDimmerControl
 
     public async Task<uint> GetAsync(int dimmer, CancellationToken token)
     {
-        using var adsClient = new AdsClient();
-        adsClient.Connect(AmsNetId.Local, 851);
-        ResultValue<uint> readResult = await adsClient.ReadValueAsync<uint>($"Main.Dimmer[{dimmer}]", token);
-        readResult.ThrowOnError();
-        return readResult.Value;
+        return await _adsService.ReadValueAsync<uint>($"Main.Dimmer[{dimmer}]", token);
     }
 
     public async Task OnAsync(DimmerId id, CancellationToken token)
@@ -45,11 +46,8 @@ public class DimmerControl : IDimmerControl
 
     private async Task SetOnPlcAsync(DimmerId id, ushort value, CancellationToken token)
     {
-        using var adsClient = new AdsClient();
-        adsClient.Connect(AmsNetId.Local, 851);
-
         string variableName = _dataExtractor.CreateVariableName(id.ToString(), "Dimmer", out bool _, out VariableInfo _);
-        var result = await adsClient.WriteValueAsync(variableName, value, token);
+        var result = await _adsService.WriteValueAsync(variableName, value, token);
         result.ThrowOnError();
     }
 }

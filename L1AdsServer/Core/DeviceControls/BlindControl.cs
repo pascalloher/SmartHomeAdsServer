@@ -1,4 +1,5 @@
 ﻿using L1AdsServer.Core.Common;
+using L1AdsServer.Core.Plc;
 using TwinCAT.Ads;
 
 namespace L1AdsServer.Core.Controls;
@@ -17,6 +18,7 @@ public class Blind
 {
 
     private readonly ILogger<Blind> _logger;
+    private readonly IAdsService _adsService;
 
     private readonly string _openVariableName;
     private readonly string _closeVariableName;
@@ -44,9 +46,10 @@ public class Blind
         }
     }
 
-    public Blind(ILogger<Blind> logger, BlindId id, TimeSpan openTime, TimeSpan closeTime, string openVariableName, string closeVariableName)
+    public Blind(ILogger<Blind> logger, IAdsService adsService, BlindId id, TimeSpan openTime, TimeSpan closeTime, string openVariableName, string closeVariableName)
     {
         _logger = logger;
+        _adsService = adsService;
 
         Id = id;
         State = BlindState.Unknown;
@@ -127,19 +130,13 @@ public class Blind
 
     private async Task SetOpenOnPlcAsync(bool value, CancellationToken token)
     {
-        using var adsClient = new AdsClient();
-        adsClient.Connect(AmsNetId.Local, 851);
-
-        var result = await adsClient.WriteValueAsync(_openVariableName, value, token);
+        var result = await _adsService.WriteValueAsync(_openVariableName, value, token);
         result.ThrowOnError();
     }
 
     private async Task SetCloseOnPlcAsync(bool value, CancellationToken token)
     {
-        using var adsClient = new AdsClient();
-        adsClient.Connect(AmsNetId.Local, 851);
-
-        var result = await adsClient.WriteValueAsync(_closeVariableName, value, token);
+        var result = await _adsService.WriteValueAsync(_closeVariableName, value, token);
         result.ThrowOnError();
     }
 }
@@ -148,16 +145,19 @@ public class BlindControl : IBlindControl
 {
     private readonly IDataExtractor _dataExtractor;
     private readonly Dictionary<BlindId, Blind> _blinds;
+    private readonly IAdsService _adsService;
 
-    public BlindControl(ILoggerFactory loggerFactory, IDataExtractor dataExtractor)
+    public BlindControl(ILoggerFactory loggerFactory, IDataExtractor dataExtractor, IAdsService adsService)
     {
         _dataExtractor = dataExtractor;
+        _adsService = adsService;
+
         _blinds = [];
-        foreach(var id in Enum.GetValues<BlindId>())
+        foreach (var id in Enum.GetValues<BlindId>())
         {
             string openVariableName = _dataExtractor.CreateVariableName(id.ToString(), "BlindOpen", out bool _, out VariableInfo _);
             string closeVariableName = _dataExtractor.CreateVariableName(id.ToString(), "BlindClose", out bool _, out VariableInfo _);
-            _blinds.Add(id, new Blind(loggerFactory.CreateLogger<Blind>(), id, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(90), openVariableName, closeVariableName));
+            _blinds.Add(id, new Blind(loggerFactory.CreateLogger<Blind>(), _adsService, id, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(90), openVariableName, closeVariableName));
         }
     }
 

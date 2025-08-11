@@ -25,6 +25,7 @@ public enum ActivationResultCode
     IssueTimeElementParseFailed = 14,
     ExpireTimeElementNotFound = 15,
     ExpireTimeElementParseFailed = 16,
+    ActivationProcessNotStarted = 17,
 }
 
 public interface IXarLicenseHandler
