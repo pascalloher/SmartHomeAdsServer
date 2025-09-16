@@ -74,9 +74,9 @@ public class DataControl : IDataControl
         _dataDescriptions = new ConcurrentDictionary<string, DataDescription>();
 
         // Subscribe to the HeartbeatMonitor
-        _adsService.PlcRestartDetected.Subscribe(async heartbeat => {
+        /*_adsService.PlcRestartDetected.Subscribe(async heartbeat => {
             await OnPlcRestartDetectedAsync(heartbeat);
-        });
+        });*/
     }
 
     private async Task OnPlcRestartDetectedAsync(ulong? lastHeartbeat)
