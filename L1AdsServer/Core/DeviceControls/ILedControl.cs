@@ -34,6 +34,12 @@ public enum LedId
     UvOg16,
     UvOg17,
     UvOg18,
+    HvUg1,
+    HvUg2,
+    HvUg3,
+    HvUg4,
+    HvUg5,
+    HvUg6,
 }
 
 public interface ILedControl
